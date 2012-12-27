@@ -1,0 +1,7 @@
+android_dir="$HOME/Android"
+export ANDROID_HOME=$android_dir/Sdk
+
+PATH+=":$android_dir/android-studio/bin"
+PATH+=":$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools/bin"
+
+alias studio="background studio.sh"

@@ -1,0 +1,235 @@
+#! /bin/zsh
+
+############################################################
+
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+alias ll='ls -lArth'
+alias grep='grep -I --color=auto'
+alias psa='ps alx'
+alias df='df -h'
+alias du='du -h'
+alias more=less
+
+if [ "$(uname -s)" == "Linux" ]; then
+	alias rm='rm -i --preserve-root'
+fi
+
+if whence dircolors >/dev/null; then
+	alias ls='ls --color=auto'
+fi
+
+############################################################
+# Global aliases
+
+alias -g G="| grep"
+alias -g X="| xargs"
+alias -g L="| less"
+alias -g N="| wc -l"
+
+############################################################
+# Default program (sufix aliases)
+
+alias -s trace=traceview
+alias -s cpp=emacs
+
+############################################################
+# cd
+
+alias -- -='cd -'
+alias ...='../..'
+alias ....='../../..'
+alias .....='../../../..'
+
+function cdd {
+	mkdir -p $1
+	cd $1
+}
+
+############################################################
+# Git
+
+alias gitk='gitk --all&!'
+alias qgit='qgit --all&!'
+
+alias gitroot='cd $(git rev-parse --show-toplevel)'
+
+function git-date {
+	git ls-tree -r --name-only HEAD | while read filename; do
+		echo "$(git log -1 --format="%ad" -- $filename) $filename"
+	done
+}
+
+function date-deleted {
+	for f in `git ls-files --deleted`; do
+		echo `git log -1 --format="%cd" -- $f` $f
+	done
+}
+
+function git-meld-diff {
+	git config --global diff.external git-meld
+	command git diff $1
+	git config --global --unset diff.external
+}
+
+function superblame {
+#	git ls-files -z | xargs -0n1 git blame -w | ruby -n -e '$_ =~ /^.*\((.*?)\s[\d]{4}/; puts $1.strip' | sort -f | uniq -c | sort -n
+	for a in $(git log --format='%aN' | sort -u); do
+		echo -e "$(globalblame "$a") \t-\t$a"
+	done
+}
+
+function globalblame {
+	git log --author="$1" --pretty=tformat: --numstat \
+		| gawk '{ add += $1 ; subs += $2 ; loc += $1 - $2 } END { printf "added lines: %s\tremoved lines : %s\t total lines: %s\n",add,subs,loc }' -
+}
+
+function autostash {
+    git stash && $* && git stash pop
+}
+
+############################################################
+# Grep
+
+function lgrep {
+	grep --color=always $* | less -r
+}
+
+function pdfgrep() {
+	for f in *.pdf;do
+		echo $f;
+		pdftotext "$f" - | grep $@
+	done
+}
+
+function mgrep() {
+	find . -regextype posix-egrep -iregex '(.*\/Makefile|.*\/Makefile\..*)' -type f -print0 | xargs -0 grep --color -n "$@"
+}
+
+function cgrep() {
+	find . -type f \( -name '*.c' -o -name '*.cc' -o -name '*.cpp' -o -name '*.h' \) -print0 | xargs -0 grep --color -n "$@"
+}
+
+function hgrep() {
+	find . -type f -name '*.h' -print0 | xargs -0 grep --color -n "$@"
+}
+
+function jgrep() {
+	find . -type f -name '*.java' -print0 | xargs -0 grep --color -n "$@"
+}
+
+function kgrep() {
+	find . -type f -name '*.kt' -print0 | xargs -0 grep --color -n "$@"
+}
+
+function extgrep() {
+	ext=$1;
+	shift
+	find . -type f -name "*.$ext" -print0 2>/dev/null | xargs -0 grep --color -n "$@"
+}
+
+function fgrep() {
+	pat=$1;
+	shift
+	find . -type f -name "$pat" -print0 2>/dev/null | xargs -0 grep --color -n "$@"
+}
+
+############################################################
+# Zenity
+
+function zendone {
+	echo "message:Success: $1" | zenity --notification --listen --timeout=1
+	return 0
+}
+
+function zenerror() {
+	zenity --error --title "Error $1" --text "Failed: $2"
+	return $1
+}
+
+function zentest() {
+	if [[ $1 -eq 0 ]]; then
+		zendone $2
+	else
+		zenerror $1 $2
+	fi
+}
+
+alias -g ZERROR='|| zenerror $?'
+alias -g ZDONE='&& zendone'
+alias -g ZEN='; zentest $?'
+
+############################################################
+# Misc
+
+function remplaceAll() {
+	if [ $# -ne 2 ]; then
+		echo "usage: $0 [string to remplace] [string used instead]"
+		exit 1
+	fi
+	find ./ -type f -readable -writable -exec sed -i "s/$1/$2/g" {} \;
+}
+
+function 2ogg = {
+	FILE=$1
+	BASE=${FILE%.*}
+	EXT=${FILE##*.}
+
+	if [ "$EXT" = "ogg" ]; then return; fi
+	if [ "$EXT" = "wav" ]; then
+			oggenc -q4 $BASE.wav
+	else
+		mplayer -ao pcm:fast:file=$BASE.wav -vo null -vc null $FILE
+		oggenc -q4 $BASE.wav
+		rm -f $BASE.wav
+	fi
+}
+
+function extract {
+	if [ -f $1 ] ; then
+		case $1 in
+			*.tar.bz2)   tar xvjf $1    ;;
+			*.tar.gz)    tar xvzf $1    ;;
+			*.tar.xz)    tar xvJf $1    ;;
+			*.bz2)       bunzip2 $1     ;;
+			*.rar)       unrar x $1     ;;
+			*.gz)        gunzip $1      ;;
+			*.tar)       tar xvf $1     ;;
+			*.tbz2)      tar xvjf $1    ;;
+			*.tgz)       tar xvzf $1    ;;
+			*.zip)       unzip $1       ;;
+			*.Z)         uncompress $1  ;;
+			*.7z)        7z x $1        ;;
+			*.xz)        unxz $1        ;;
+			*.exe)       cabextract $1  ;;
+			*)           echo "\`$1': unrecognized file compression" ;;
+		esac
+	else
+		echo "\`$1' is not a valid file"
+	fi
+}
+
+function old {
+	mv $1 $1.old
+}
+
+function unold {
+	FILE=$1
+	extension=${FILE##*.}
+	if [ "$extension" = "old" ]; then
+		mv $FILE ${FILE%.*}
+	else
+		echo "Not an \"old\" file:"
+	fi
+}
+
+function fd() {
+	find -iname "*$@*"
+}
+
+alias tag='etags -Rh ".c.cpp.h"'
+alias fuck='eval $(thefuck $(fc -ln -1 | tail -n 1)); fc -R'
+alias update='sudo -- sh -c "apt update; apt upgrade"'
+alias temps='curl wttr.in'
+alias fortuna='echo `/usr/games/fortune` | cowsay -f $(/bin/ls /usr/share/cowsay/cows -1 | head -n $(expr $$$(date +%s) % $(ls /usr/share/cowsay/cows | wc -w) + 1) | tail -n 1)'

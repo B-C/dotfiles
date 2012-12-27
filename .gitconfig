@@ -1,0 +1,71 @@
+[user]
+	name = Bertrand Chazot
+	email = bertrand@chazot.fr
+	signingkey = 2389E976CF99EB43AD307A31396B020804B57D3A
+[color]
+	diff = auto
+	status = auto
+	branch = auto
+	interactive = auto
+	ui = auto
+[core]
+	editor = emacs
+	excludesfile = /home/bertrand/.gitignore
+	pager = less -x 5,9
+[merge]
+	tool = meld
+	defaultToUpstream
+[alias]
+	fixup = commit --fixup
+	amend = commit --amend -C HEAD
+	fp = fetch -p
+	co = checkout
+	br = branch
+	ci = commit
+	st = status
+#    reset-remote = reset --hard origin $(rev-parse --abbrev-ref HEAD)
+	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative
+	graph = log --graph --simplify-by-decoration --pretty=format:'%d' --all
+	lp = log --pretty=\"%h - %an, %ar : %s\"
+	lb = log --pretty=\"%h - %ar : %s\" --author=Bertrand
+	dp = diff --minimal
+	committers = shortlog -s -n
+	subdate = submodule update --recursive
+	subinit = submodule update --recursive --init
+	current = rev-parse --abbrev-ref HEAD
+	latest = for-each-ref --sort=-committerdate --format='%(committerdate:short) %(refname:short) [%(committername)]'
+	last-fetched = log ORIG_HEAD.. --stat --no-merges
+	serve = !git daemon --reuseaddr --verbose  --base-path=. --export-all ./.git
+	who = shortlog -s --
+	stale = !git latest | grep origin/ | grep -v /personal | grep -v /palooza | grep -v /master | grep -v /develop | grep -v /HEAD
+	missing = "!f() { git log --oneline --no-merges --cherry-pick --right-only origin/develop...$1; }; f"
+[color "branch"]
+	current = yellow reverse
+	local = yellow
+	remote = green
+[color "diff"]
+	meta = yellow bold
+	frag = magenta bold
+	old = red bold
+	new = green bold
+	whitespace = red reverse
+[color "status"]
+	added = green
+	changed = red
+	untracked = red
+[diff]
+[push]
+	default = current
+[rebase]
+	autostash = true
+[diff]
+	algorithm = histogram
+[commit]
+	gpgsign = true
+[filter "lfs"]
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+[pull]
+	rebase = true

@@ -1,0 +1,11 @@
+# Global .gitignore
+
+\#*
+.#*
+*~
+*.orig
+.zcache
+TAGS
+GPATH
+GRTAGS
+GTAGS

@@ -1,0 +1,30 @@
+[global_config]
+  borderless = True
+  enabled_plugins = TerminalShot, APTURLHandler, LaunchpadBugURLHandler
+  handle_size = 3
+  scroll_tabbar = True
+  tab_position = hidden
+  window_state = maximise
+[keybindings]
+  close_term = F6
+  full_screen = <Ctrl><Shift>F11
+  split_horiz = F4
+  split_vert = F2
+[layouts]
+  [[default]]
+    [[[child1]]]
+      parent = window0
+      type = Terminal
+    [[[window0]]]
+      parent = ""
+      type = Window
+[plugins]
+[profiles]
+  [[default]]
+    background_darkness = 0.81
+    background_type = transparent
+    cursor_color = "#ffffff"
+    foreground_color = "#ffffff"
+    scrollback_infinite = True
+    scrollbar_position = hidden
+    show_titlebar = False
